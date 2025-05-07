@@ -1,0 +1,5 @@
+1.Add /me route for users
+2.Add RBAC-based admin routes
+3.Add /refresh and /logout
+4.Setup Artist profile management
+
