@@ -42,7 +42,7 @@ export class AuthService {
   }
 
   async genrateTokens(userId: string, email: string, role: string) {
-    const payload = { sub: userId, email, role };
+    const payload = { userId, email, role };
 
     const [access, refresh] = await Promise.all([
       this.jwt.signAsync(payload, {
