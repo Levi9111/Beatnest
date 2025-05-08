@@ -11,6 +11,7 @@ import { Song, SongDocumet } from 'src/songs/schemas/song.schema';
 import { CreatePlaylistDto } from './dto/create-playlist.dto';
 import { UpdatePlaylistDto } from './dto/update-playlist.dto';
 import { AddSongDto } from './dto/add-song.dto';
+import { User, UserDocument } from 'src/users/schemas/user.schema';
 
 @Injectable()
 export class PlaylistsService {
@@ -19,6 +20,8 @@ export class PlaylistsService {
     private readonly playlistModel: Model<Playlist>,
     @InjectModel(Song.name)
     private readonly songModel: Model<SongDocumet>,
+    @InjectModel(User.name)
+    private readonly userModel: Model<UserDocument>,
   ) {}
 
   async create(
@@ -110,5 +113,37 @@ export class PlaylistsService {
     playlist.songs.push(song._id);
     await playlist.save();
     return playlist.populate('songs');
+  }
+
+  async likePlaylist(playlistId: Types.ObjectId, userId: Types.ObjectId) {
+    const playlist = await this.playlistModel.findById(playlistId);
+    if (!playlist) throw new NotFoundException('Playlist not found');
+    if (!playlist.isPublic && !playlist.createdBy.equals(userId)) {
+      throw new ForbiddenException(
+        'You are not authorized to like this playlist',
+      );
+    }
+
+    await this.userModel.findByIdAndUpdate(userId, {
+      $addToSet: { likedPlaylists: playlistId },
+    });
+
+    return { message: 'Playlist liked' };
+  }
+
+  async unlikePlaylist(playlistId: Types.ObjectId, userId: Types.ObjectId) {
+    const playlist = await this.playlistModel.findById(playlistId);
+    if (!playlist) throw new NotFoundException('Playlist not found');
+    if (!playlist.isPublic && !playlist.createdBy.equals(userId)) {
+      throw new ForbiddenException(
+        'You are not authorized to modify this playlist',
+      );
+    }
+
+    await this.userModel.findByIdAndUpdate(userId, {
+      $pull: { likedPlaylists: playlistId },
+    });
+
+    return { message: 'Playlist unliked' };
   }
 }

@@ -4,6 +4,7 @@ import { PlaylistsController } from './playlists.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Playlist, PlaylistSchema } from './schemas/playlist.schema';
 import { Song, SongSchema } from 'src/songs/schemas/song.schema';
+import { User, UserSchema } from 'src/users/schemas/user.schema';
 
 @Module({
   imports: [
@@ -15,6 +16,10 @@ import { Song, SongSchema } from 'src/songs/schemas/song.schema';
       {
         name: Song.name,
         schema: SongSchema,
+      },
+      {
+        name: User.name,
+        schema: UserSchema,
       },
     ]),
   ],

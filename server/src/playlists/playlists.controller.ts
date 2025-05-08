@@ -70,4 +70,20 @@ export class PlaylistsController {
   ) {
     return this.playlistService.addSong(playlistId, user._id, dto);
   }
+
+  @Post(':id/like')
+  async likePlaylist(
+    @Param('id') id: Types.ObjectId,
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return this.playlistService.likePlaylist(id, user._id);
+  }
+
+  @Delete(':id/like')
+  async unlikePlaylist(
+    @Param('id') id: Types.ObjectId,
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return this.playlistService.unlikePlaylist(id, user._id);
+  }
 }

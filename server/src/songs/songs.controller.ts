@@ -21,17 +21,20 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 import { UserRole } from 'src/users/dto/create-user.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { v4 as uuid } from 'uuid';
 import * as path from 'path';
 import { CreateSongDto } from './dto/create-song.dto';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { CurrentUserPayload } from 'src/auth/interfaces/current-user.interface';
 import { UpdateSongDto } from './dto/update-song.dto';
+import { UploadService } from 'src/upload/upload.service';
 
 @Controller('songs')
 @UseGuards(JwtAuthGuard, RoleGuards)
 export class SongsController {
-  constructor(private readonly songsService: SongsService) {}
+  constructor(
+    private readonly songsService: SongsService,
+    private readonly cloudinaryService: UploadService,
+  ) {}
 
   @Post()
   @Roles(UserRole.ARTIST)
@@ -43,16 +46,38 @@ export class SongsController {
       ],
       {
         storage: diskStorage({
-          destination: './uploads/songs',
-          filename: (
-            req: Express.Request,
-            file: Express.Multer.File,
-            cb: (error: Error | null, filename: string) => void,
-          ) => {
+          destination: (req, file, cb) => {
+            const folder = file.fieldname === 'audio' ? 'songs' : 'covers';
+            cb(null, `uploads/${folder}`);
+          },
+          filename: (req, file, cb) => {
+            const uniqueSuffix =
+              Date.now() + '-' + Math.round(Math.random() * 1e9);
             const ext = path.extname(file.originalname as string);
-            cb(null, `${uuid()}${ext}`);
+            cb(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
           },
         }),
+        fileFilter: (req, file, cb) => {
+          const allowedMimeTypes = [
+            'audio/mpeg',
+            'audio/wav',
+            'image/jpeg',
+            'image/png',
+            'image/webp',
+          ];
+
+          if (!allowedMimeTypes.includes(file.mimetype)) {
+            return cb(
+              new Error('Invalid file type. Only image and audio allowed'),
+              false,
+            );
+          }
+
+          cb(null, true);
+        },
+        limits: {
+          fileSize: 15 * 1024 * 1024, // 15MB
+        },
       },
     ),
   )
@@ -69,11 +94,27 @@ export class SongsController {
     if (!audioFile) throw new BadRequestException('Audio file is required');
     const imageFile = files.image?.[0];
 
+    // Upload to cloudinary
+    const audioUpload = await this.cloudinaryService.uploadFromDisk(
+      audioFile.path,
+      'uploads/songs',
+      'video',
+    );
+
+    let imageUpload: { secure_url: string } | undefined;
+    if (imageFile) {
+      imageUpload = await this.cloudinaryService.uploadFromDisk(
+        imageFile.path,
+        'uploads/covers',
+        'image',
+      );
+    }
+
     return this.songsService.create(
       createSongDto,
       user._id,
-      audioFile.path as string,
-      imageFile?.path as string,
+      audioUpload.secure_url,
+      imageUpload?.secure_url,
     );
   }
 

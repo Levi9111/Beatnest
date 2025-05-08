@@ -8,6 +8,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { SongsModule } from './songs/songs.module';
 import { AlbumsModule } from './albums/albums.module';
 import { PlaylistsModule } from './playlists/playlists.module';
+import { RecommendationModule } from './recommendation/recommendation.module';
+import { UploadModule } from './upload/upload.module';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { PlaylistsModule } from './playlists/playlists.module';
     SongsModule,
     AlbumsModule,
     PlaylistsModule,
+    RecommendationModule,
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [AppService],

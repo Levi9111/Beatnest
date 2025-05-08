@@ -3,6 +3,7 @@ import { SongsController } from './songs.controller';
 import { SongsService } from './songs.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Song, SongSchema } from './schemas/song.schema';
+import { UploadModule } from 'src/upload/upload.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { Song, SongSchema } from './schemas/song.schema';
         schema: SongSchema,
       },
     ]),
+    UploadModule,
   ],
   controllers: [SongsController],
   providers: [SongsService],

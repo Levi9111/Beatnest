@@ -3,3 +3,9 @@
 3.Add /refresh and /logout
 4.Setup Artist profile management
 
+5. Manage history
+6. Apply JS algorithm Module 6
+
+
+*** Add querybuilder
+*** Autocomplete sugestions
