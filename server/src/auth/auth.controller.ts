@@ -9,6 +9,7 @@ export class AuthController {
 
   @Post('signup')
   sighup(@Body() dto: CreateUserDto) {
+    console.log('Test');
     return this.authService.signup(dto);
   }
 
