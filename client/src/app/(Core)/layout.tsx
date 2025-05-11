@@ -1,17 +1,22 @@
+import BottomBar from "@/components/Bottombar";
 import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/Sidebar";
 
 export default function CoreLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <div className="min-h-screen bg-dark-background text-dark-text">
+    <div className="h-screen flex flex-col bg-black text-white relative">
       <Navbar />
-      <div className="grid grid-cols-[300px_1fr]">
+      <div className="flex flex-1 overflow-hidden">
         <Sidebar />
-        <section className="p-6 overflow-y-auto">{children}</section>
+        {/* Scrollable content area */}
+        <main className="flex-1 overflow-y-auto home-scroll px-6 py-4">
+          {children}
+        </main>
+        <BottomBar />
       </div>
     </div>
   );

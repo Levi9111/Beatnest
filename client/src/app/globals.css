@@ -131,6 +131,16 @@
     border-radius: 10px;
   }
 
+  .home-scroll::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+  }
+
+  .home-scroll {
+    -ms-overflow-style: none; /* IE/Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
   * {
     @apply border-border outline-ring/50;
   }
