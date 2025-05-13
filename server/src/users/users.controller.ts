@@ -1,7 +1,7 @@
 import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { RoleGuards } from 'src/auth/guards/roles.guard';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/jwt/guards/jwt-auth.guard';
+import { RoleGuards } from 'src/jwt/guards/roles.guard';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard, RoleGuards)

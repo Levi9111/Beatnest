@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -10,6 +11,7 @@ import { UsersService } from 'src/users/users.service';
 import { LoginDto } from './dto/login.dto';
 import { ConfigService } from '@nestjs/config';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { generateToken, verifyToken } from 'src/jwt/jwt.utils';
 
 @Injectable()
 export class AuthService {
@@ -34,27 +36,57 @@ export class AuthService {
 
   async login(dto: LoginDto) {
     const user = await this.userService.findByEmail(dto.email);
+
     if (!user) throw new BadRequestException('User not found');
+
     if (!(await bcrypt.compare(dto.password, user.password)))
       throw new UnauthorizedException('incorrect password');
 
     return this.genrateTokens(user._id as string, user.email, user.role);
   }
 
-  async genrateTokens(userId: string, email: string, role: string) {
+  genrateTokens(userId: string, email: string, role: string) {
     const payload = { userId, email, role };
 
-    const [access, refresh] = await Promise.all([
-      this.jwt.signAsync(payload, {
-        secret: this.config.get<string>('JWT_ACCESS_SECRET'),
-        expiresIn: this.config.get<string>('ACCESS_TOKEN_EXPIRATION'),
-      }),
-      this.jwt.signAsync(payload, {
-        secret: this.config.get<string>('JWT_REFRESH_SECRET'),
-        expiresIn: this.config.get<string>('REFRESH_TOKEN_EXPIRATION'),
-      }),
-    ]);
+    const accessToken = generateToken(
+      payload,
+      this.config.get<string>('JWT_ACCESS_SECRET')!,
+      this.config.get<string>('ACCESS_TOKEN_EXPIRATION')!,
+    );
 
-    return { accressToken: access, refreshToken: refresh };
+    const refreshToken = generateToken(
+      payload,
+      this.config.get<string>('JWT_REFRESH_SECRET')!,
+      this.config.get<string>('REFRESH_TOKEN_EXPIRATION')!,
+    );
+
+    return { accessToken, refreshToken };
+  }
+
+  async generateRefreshToken(token: string) {
+    const decoded = verifyToken(
+      token,
+      this.config.get<string>('JWT_REFRESH_SECRET')!,
+    );
+    const { userId } = decoded as Record<string, string>;
+
+    const user = await this.userService.findById(userId);
+
+    if (!user) throw new NotFoundException('User not found');
+
+    const jwtPayload = {
+      userId: user._id as string,
+      email: user.email,
+      role: user.role,
+    };
+    const accessToken = generateToken(
+      jwtPayload,
+      this.config.get<string>('JWT_ACCESS_SECRET')!,
+      this.config.get<string>('ACCESS_TOKEN_EXPIRATION')!,
+    );
+
+    return {
+      accessToken,
+    };
   }
 }

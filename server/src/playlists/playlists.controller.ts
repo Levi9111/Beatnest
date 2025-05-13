@@ -9,8 +9,6 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { RoleGuards } from 'src/auth/guards/roles.guard';
 import { PlaylistsService } from './playlists.service';
 import { CreatePlaylistDto } from './dto/create-playlist.dto';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
@@ -18,6 +16,8 @@ import { CurrentUserPayload } from 'src/auth/interfaces/current-user.interface';
 import { Types } from 'mongoose';
 import { UpdatePlaylistDto } from './dto/update-playlist.dto';
 import { AddSongDto } from './dto/add-song.dto';
+import { JwtAuthGuard } from 'src/jwt/guards/jwt-auth.guard';
+import { RoleGuards } from 'src/jwt/guards/roles.guard';
 
 @Controller('playlists')
 @UseGuards(JwtAuthGuard, RoleGuards)

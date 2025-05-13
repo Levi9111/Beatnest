@@ -14,8 +14,6 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { RoleGuards } from 'src/auth/guards/roles.guard';
 import { SongsService } from './songs.service';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { UserRole } from 'src/users/dto/create-user.dto';
@@ -27,6 +25,8 @@ import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { CurrentUserPayload } from 'src/auth/interfaces/current-user.interface';
 import { UpdateSongDto } from './dto/update-song.dto';
 import { UploadService } from 'src/upload/upload.service';
+import { JwtAuthGuard } from 'src/jwt/guards/jwt-auth.guard';
+import { RoleGuards } from 'src/jwt/guards/roles.guard';
 
 @Controller('songs')
 @UseGuards(JwtAuthGuard, RoleGuards)
