@@ -10,7 +10,7 @@ import * as bcrypt from 'bcrypt';
 import { UsersService } from 'src/users/users.service';
 import { LoginDto } from './dto/login.dto';
 import { ConfigService } from '@nestjs/config';
-import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { CreateUserDto, UserRole } from 'src/users/dto/create-user.dto';
 import { generateToken, verifyToken } from 'src/jwt/jwt.utils';
 
 @Injectable()
@@ -88,5 +88,26 @@ export class AuthService {
     return {
       accessToken,
     };
+  }
+
+  async socialLogin(oauthUser: {
+    providerId: string;
+    email: string;
+    name: string;
+    provider: string;
+  }) {
+    let user = await this.userService.findByEmail(oauthUser.email);
+
+    if (!user) {
+      user = await this.userService.createUser({
+        email: oauthUser.email,
+        name: oauthUser.name,
+        provider: oauthUser.provider,
+        providerId: oauthUser.providerId,
+        password: '',
+        role: UserRole.USER,
+      });
+    }
+    return this.genrateTokens(user._id as string, user.email, user.role);
   }
 }
