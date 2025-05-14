@@ -33,7 +33,6 @@ const SignUpPage = () => {
   } = useForm<SignupFormValues>();
 
   const onSubmit = async (data: SignupFormValues) => {
-    console.log(data);
     try {
       const result = await signup({
         name: data.fullName,
@@ -41,8 +40,8 @@ const SignUpPage = () => {
         password: data.password,
       }).unwrap();
       dispatch(setAccessToken(result.accessToken));
-      toast.success("Signup successful! 🎉");
       router.push("/auth/signup/verify-email");
+      toast.success("Signup successful! 🎉");
       reset();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {

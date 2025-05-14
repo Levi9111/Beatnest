@@ -6,6 +6,7 @@ export interface CurrentUserPayload {
   userId: string;
   email: string;
   role: UserRole;
+  isAuthenticated: boolean;
 }
 
 export interface SocialUser {

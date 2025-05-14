@@ -10,7 +10,7 @@ export class User {
   @Prop({ required: true })
   name: string;
 
-  @Prop({ unique: true, default: null })
+  @Prop({ unique: true, sparse: true, default: null })
   userName: string;
 
   @Prop({ required: true, unique: true })
@@ -37,6 +37,15 @@ export class User {
     default: [],
   })
   likedPlaylists: Playlist[];
+
+  @Prop({
+    type: [Types.ObjectId],
+    default: [],
+  })
+  likedSongs: Types.ObjectId[];
+
+  @Prop({ default: false })
+  isAuthenticated: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

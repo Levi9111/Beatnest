@@ -6,6 +6,7 @@ export const generateToken = (
     userId: string;
     email: string;
     role: string;
+    isAuthenticated: boolean;
   },
   secret: string,
   expiresIn: string,

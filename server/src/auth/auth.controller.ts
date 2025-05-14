@@ -29,7 +29,6 @@ export class AuthController {
     @Body() dto: CreateUserDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    console.log('Test');
     const { accessToken, refreshToken } = await this.authService.signup(dto);
 
     res.cookie('refreshToken', refreshToken, {

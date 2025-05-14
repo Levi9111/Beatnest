@@ -31,7 +31,12 @@ export class AuthService {
       ...dto,
       password: hashed,
     });
-    return this.genrateTokens(user._id as string, user.email, user.role);
+    return this.genrateTokens(
+      user._id as string,
+      user.email,
+      user.role,
+      user.isAuthenticated,
+    );
   }
 
   async login(dto: LoginDto) {
@@ -42,11 +47,21 @@ export class AuthService {
     if (!(await bcrypt.compare(dto.password, user.password)))
       throw new UnauthorizedException('incorrect password');
 
-    return this.genrateTokens(user._id as string, user.email, user.role);
+    return this.genrateTokens(
+      user._id as string,
+      user.email,
+      user.role,
+      user.isAuthenticated,
+    );
   }
 
-  genrateTokens(userId: string, email: string, role: string) {
-    const payload = { userId, email, role };
+  genrateTokens(
+    userId: string,
+    email: string,
+    role: string,
+    isAuthenticated: boolean,
+  ) {
+    const payload = { userId, email, role, isAuthenticated };
 
     const accessToken = generateToken(
       payload,
@@ -78,6 +93,7 @@ export class AuthService {
       userId: user._id as string,
       email: user.email,
       role: user.role,
+      isAuthenticated: user.isAuthenticated,
     };
     const accessToken = generateToken(
       jwtPayload,
@@ -105,9 +121,15 @@ export class AuthService {
         provider: oauthUser.provider,
         providerId: oauthUser.providerId,
         password: '',
+        isAuthenticated: true,
         role: UserRole.USER,
       });
     }
-    return this.genrateTokens(user._id as string, user.email, user.role);
+    return this.genrateTokens(
+      user._id as string,
+      user.email,
+      user.role,
+      user.isAuthenticated,
+    );
   }
 }
