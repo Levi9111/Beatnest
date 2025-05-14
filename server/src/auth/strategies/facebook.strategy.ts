@@ -1,3 +1,4 @@
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import {
@@ -5,7 +6,9 @@ import {
   StrategyOptions,
   VerifyCallback,
 } from 'passport-google-oauth20';
+import { SocialUser } from '../interfaces/current-user.interface';
 
+@Injectable()
 export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
   constructor(private readonly config: ConfigService) {
     super({
@@ -32,7 +35,7 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
       email: emails?.[0].value,
       name: `${name.givenName} ${name.familyName}`,
       provider: 'facebook',
-    };
+    } as SocialUser;
     done(null, user);
   }
 }

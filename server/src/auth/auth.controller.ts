@@ -14,6 +14,8 @@ import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { Request, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
+import { SocialUser } from './interfaces/current-user.interface';
+import { JwtAuthGuard } from 'src/jwt/guards/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -74,15 +76,24 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
-  async googleCallback(@Req() req, @Res() res: Response) {
-    const tokens = await this.authService.socialLogin(req.user);
-    res.cookie('refresh_token', tokens.refreshToken, {
+  async googleCallback(@Req() req: Request, @Res() res: Response) {
+    const user = req.user as SocialUser;
+
+    const tokens = await this.authService.socialLogin(user);
+
+    res.cookie('accessToken', tokens.accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      secure: this.config.get<string>('NODE_ENV') === 'production',
     });
-    return res.redirect(`${process.env.CLIENT_URL}/oauth-success?token=${tokens.accessToken}`);
+
+    res.cookie('refreshToken', tokens.refreshToken, {
+      httpOnly: true,
+      secure: this.config.get<string>('NODE_ENV') === 'production',
+    });
+
+    return res.redirect(
+      `${this.config.get<string>('CLIENT_URL')}/oauth-success`,
+    );
   }
 
   // Facebook OAuth
@@ -92,15 +103,29 @@ export class AuthController {
 
   @Get('facebook/callback')
   @UseGuards(AuthGuard('facebook'))
-  async facebookCallback(@Req() req, @Res() res: Response) {
-    const tokens = await this.authService.socialLogin(req.user);
-    res.cookie('refresh_token', tokens.refreshToken, {
+  async facebookCallback(@Req() req: Request, @Res() res: Response) {
+    const user = req.user as SocialUser;
+
+    const tokens = await this.authService.socialLogin(user);
+
+    res.cookie('accessToken', tokens.accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      secure: this.config.get<string>('NODE_ENV') === 'production',
     });
-    return res.redirect(`${process.env.CLIENT_URL}/oauth-success?token=${tokens.accessToken}`);
+
+    res.cookie('refreshToken', tokens.refreshToken, {
+      httpOnly: true,
+      secure: this.config.get<string>('NODE_ENV') === 'production',
+    });
+
+    return res.redirect(
+      `${this.config.get<string>('CLIENT_URL')}/oauth-success`,
+    );
+  }
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  me(@Req() req: Request) {
+    return req.user;
   }
 }
-

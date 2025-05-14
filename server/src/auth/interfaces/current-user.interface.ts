@@ -7,3 +7,10 @@ export interface CurrentUserPayload {
   email: string;
   role: UserRole;
 }
+
+export interface SocialUser {
+  providerId: string;
+  email: string;
+  name: string;
+  provider: 'google' | 'facebook' | 'apple';
+}
