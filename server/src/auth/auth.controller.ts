@@ -10,12 +10,16 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
-import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { CreateUserDto, UserRole } from 'src/users/dto/create-user.dto';
 import { Request, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 import { SocialUser } from './interfaces/current-user.interface';
 import { JwtAuthGuard } from 'src/jwt/guards/jwt-auth.guard';
+import { GenerateOtpDto } from './dto/generate-otp.dto';
+import { RoleGuards } from 'src/jwt/guards/roles.guard';
+import { Roles } from './decorators/roles.decorator';
+import { VerifyOtpDto } from './dto/verrify-otp.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -29,7 +33,13 @@ export class AuthController {
     @Body() dto: CreateUserDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { accessToken, refreshToken } = await this.authService.signup(dto);
+    const result = await this.authService.signup(dto);
+
+    if ('message' in result) {
+      throw new UnauthorizedException(result.message);
+    }
+
+    const { accessToken, refreshToken } = result;
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
@@ -39,6 +49,30 @@ export class AuthController {
     return {
       accessToken,
     };
+  }
+
+  @Post('signup/generate-otp')
+  @UseGuards(JwtAuthGuard, RoleGuards)
+  @Roles(UserRole.USER, UserRole.ARTIST, UserRole.ADMIN)
+  async generateOtp(@Body() dto: GenerateOtpDto) {
+    await this.authService.generateOtp(dto);
+  }
+
+  @Post('signup/verify-otp')
+  @UseGuards(JwtAuthGuard, RoleGuards)
+  @Roles(UserRole.USER, UserRole.ARTIST, UserRole.ADMIN)
+  async verifyOtp(
+    @Body() dto: VerifyOtpDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { accessToken, refreshToken } = await this.authService.verifyOtp(dto);
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: this.config.get<string>('NODE_ENV') === 'production',
+    });
+
+    return { accessToken };
   }
 
   @Post('login')
@@ -123,7 +157,8 @@ export class AuthController {
   }
 
   @Get('me')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RoleGuards)
+  @Roles(UserRole.USER, UserRole.ARTIST, UserRole.ADMIN)
   me(@Req() req: Request) {
     return req.user;
   }

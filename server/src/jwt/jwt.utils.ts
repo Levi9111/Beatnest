@@ -4,6 +4,8 @@ import * as jwt from 'jsonwebtoken';
 export const generateToken = (
   jwtPayload: {
     userId: string;
+    name: string;
+    userName: string;
     email: string;
     role: string;
     isAuthenticated: boolean;

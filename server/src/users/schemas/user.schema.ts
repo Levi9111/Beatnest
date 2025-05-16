@@ -13,6 +13,9 @@ export class User {
   @Prop({ unique: true, sparse: true, default: null })
   userName: string;
 
+  @Prop()
+  imageUrl: string;
+
   @Prop({ required: true, unique: true })
   email: string;
 
@@ -27,6 +30,12 @@ export class User {
 
   @Prop({ enum: USER_ROLES, default: USER_ROLES[0] })
   role: UserRole;
+
+  @Prop({ default: null, sparse: true })
+  otp: string;
+
+  @Prop({ default: null, sparse: true })
+  otpExpiresAt: string;
 
   @Prop({ type: [String], default: [] })
   purchasedSongs: string[];

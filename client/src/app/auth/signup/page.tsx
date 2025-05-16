@@ -7,10 +7,10 @@ import Link from "next/link";
 import SocialAuth from "@/components/SocialAuth";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { useSignupMutation } from "@/redux/auth/authApi";
+import { useGenerateOtpMutation, useSignupMutation } from "@/redux/api/authApi";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/redux/hooks";
-import { setAccessToken } from "@/redux/authSlice";
+import { clearAccessToken, setAccessToken } from "@/redux/slices/authSlice";
 
 // Validation Schema
 
@@ -23,6 +23,7 @@ interface SignupFormValues {
 
 const SignUpPage = () => {
   const [signup, { isLoading }] = useSignupMutation();
+  const [generateOtp, { isLoading: isOtpLoading }] = useGenerateOtpMutation();
   const dispatch = useAppDispatch();
   const router = useRouter();
   const {
@@ -39,6 +40,8 @@ const SignUpPage = () => {
         email: data.email,
         password: data.password,
       }).unwrap();
+      await generateOtp({ email: data.email }).unwrap();
+      dispatch(clearAccessToken());
       dispatch(setAccessToken(result.accessToken));
       router.push("/auth/signup/verify-email");
       toast.success("Signup successful! 🎉");
@@ -161,16 +164,17 @@ const SignUpPage = () => {
             {/* Submit Button */}
             <Button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || isOtpLoading}
               className="w-full bg-velvet hover:bg-velvet/90 transition rounded-lg text-white font-medium py-2"
             >
-              {isLoading ? "Signing Up..." : "Sign Up"}
+              {isLoading || isOtpLoading ? "Signing Up..." : "Sign Up"}
             </Button>
           </div>
           {/* Terms */}
           <label className="flex items-start text-xs text-gray-400 gap-2 pt-4">
             <input
               type="checkbox"
+              defaultChecked={true}
               className="mt-1 accent-velvet w-4 h-4 rounded bg-dark-background border border-gray-600"
               {...register("agree", {
                 required: "You must agree to the terms and conditions",

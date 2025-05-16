@@ -1,4 +1,4 @@
-import { baseApi } from "../api/baseApi";
+import { baseApi } from "./baseApi";
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -25,6 +25,21 @@ export const authApi = baseApi.injectEndpoints({
     getMe: builder.query({
       query: () => "/auth/me",
     }),
+    generateOtp: builder.mutation({
+      query: (email) => ({
+        url: "auth/signup/generate-otp",
+        method: "POST",
+        body: email,
+      }),
+    }),
+    verifyOtp: builder.mutation({
+      query: (credentials) => ({
+        url: "auth/signup/verify-otp",
+        method: "POST",
+        body: credentials,
+      }),
+    }),
+
     refreshToken: builder.mutation({
       query: () => ({
         url: "/auth/login/refresh-token",
@@ -40,4 +55,6 @@ export const {
   useLogoutMutation,
   useSignupMutation,
   useRefreshTokenMutation,
+  useGenerateOtpMutation,
+  useVerifyOtpMutation,
 } = authApi;

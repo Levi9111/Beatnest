@@ -1,12 +1,15 @@
 "use client";
+
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ShieldCheck } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { useGetMeQuery } from "@/redux/auth/authApi";
+import { useGetMeQuery, useVerifyOtpMutation } from "@/redux/api/authApi";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useAppDispatch } from "@/redux/hooks";
+import { setAccessToken } from "@/redux/slices/authSlice";
 
 type VerifyFormData = {
   code: string;
@@ -20,24 +23,49 @@ const VerifyEmail = () => {
   } = useForm<VerifyFormData>();
   const router = useRouter();
 
-  const { data, isLoading, error } = useGetMeQuery(undefined);
+  const { data: userData, isLoading, error } = useGetMeQuery(undefined);
+  const [verifyOtp, { isLoading: isOtpLoading }] = useVerifyOtpMutation();
+  const dispatch = useAppDispatch();
+
+  const [secondsLeft, setSecondsLeft] = useState(600); // 10 minutes countdown
 
   useEffect(() => {
-    if (!isLoading && data?.isAuthenticated) {
+    if (!isLoading && !isOtpLoading && userData?.isAuthenticated) {
       router.push("/home");
     }
-  }, [isLoading, data, router]);
+  }, [isLoading, isOtpLoading, userData, router]);
 
-  const onSubmit = (data: VerifyFormData) => {
-    console.log("Verification code submitted:", data.code);
-    // TODO: Call backend endpoint to verify the code
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSecondsLeft((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatTime = (sec: number) => {
+    const m = Math.floor(sec / 60)
+      .toString()
+      .padStart(2, "0");
+    const s = (sec % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
+  };
+
+  const onSubmit = async (data: VerifyFormData) => {
+    const result = await verifyOtp({
+      email: userData.email,
+      otp: data.code,
+    });
+    console.log(result);
+    console.log(result.data.accessToken);
+    dispatch(setAccessToken(result.data.accessToken));
+    router.push("/auth/signup/user-name");
   };
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-white bg-black">
-        <p>Loading...</p>{" "}
-        {/* You can replace this with a spinner if you have one */}
+        <p>Loading...</p>
       </div>
     );
   }
@@ -60,6 +88,12 @@ const VerifyEmail = () => {
             <p className="text-sm text-gray-400">
               We’ve sent a 6-digit verification code to your email. Please enter
               it below.
+            </p>
+            <p className="text-sm text-gray-400">
+              Your OTP expires in:{" "}
+              <span className="text-white font-semibold">
+                {formatTime(secondsLeft)}
+              </span>
             </p>
           </div>
 

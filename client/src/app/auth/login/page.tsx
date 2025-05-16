@@ -5,12 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
-import { useLoginMutation } from "@/redux/auth/authApi";
+import { useLoginMutation } from "@/redux/api/authApi";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import SocialAuth from "@/components/SocialAuth";
 import { useAppDispatch } from "@/redux/hooks";
-import { setAccessToken } from "@/redux/authSlice";
+import { setAccessToken } from "@/redux/slices/authSlice";
 
 interface LoginFormValues {
   email: string;
@@ -143,6 +143,7 @@ const LoginPage = () => {
           <label className="flex items-start text-xs text-gray-400 gap-2 pt-4">
             <input
               type="checkbox"
+              defaultChecked={true}
               className="mt-1 accent-velvet w-4 h-4 rounded bg-dark-background border border-gray-600"
               {...register("agree", {
                 required: "You must agree to the terms and conditions",
