@@ -9,6 +9,16 @@ export const userApi = baseApi.injectEndpoints({
         body: data,
       }),
     }),
+    resetPassword: builder.mutation({
+      query: (credentials) => {
+        console.log(credentials);
+        return {
+          url: "users",
+          method: "PATCH",
+          body: credentials,
+        };
+      },
+    }),
     getAllUsers: builder.query({
       query: () => "users",
     }),
@@ -30,4 +40,5 @@ export const {
   useGetAllUsersQuery,
   useGetUserByIdQuery,
   useGetUserByEmailMutation,
+  useResetPasswordMutation,
 } = userApi;

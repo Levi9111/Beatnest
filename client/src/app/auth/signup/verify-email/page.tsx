@@ -31,7 +31,7 @@ const VerifyEmail = () => {
 
   useEffect(() => {
     if (!isLoading && !isOtpLoading && userData?.isAuthenticated) {
-      router.push("/home");
+      router.push("/");
     }
   }, [isLoading, isOtpLoading, userData, router]);
 
@@ -56,8 +56,6 @@ const VerifyEmail = () => {
       email: userData.email,
       otp: data.code,
     });
-    console.log(result);
-    console.log(result.data.accessToken);
     dispatch(setAccessToken(result.data.accessToken));
     router.push("/auth/signup/user-name");
   };

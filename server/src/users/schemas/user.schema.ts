@@ -31,10 +31,10 @@ export class User {
   @Prop({ enum: USER_ROLES, default: USER_ROLES[0] })
   role: UserRole;
 
-  @Prop({ default: null, sparse: true })
-  otp: string;
+  @Prop({ type: String, default: null, sparse: true })
+  otp: string | null;
 
-  @Prop({ default: null, sparse: true })
+  @Prop({ type: String, default: null, sparse: true })
   otpExpiresAt: string;
 
   @Prop({ type: [String], default: [] })

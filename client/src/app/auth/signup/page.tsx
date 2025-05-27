@@ -43,7 +43,7 @@ const SignUpPage = () => {
       await generateOtp({ email: data.email }).unwrap();
       dispatch(clearAccessToken());
       dispatch(setAccessToken(result.accessToken));
-      router.push("/auth/signup/verify-email");
+      router.push("/auth/verify-user");
       toast.success("Signup successful! 🎉");
       reset();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

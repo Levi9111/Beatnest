@@ -5,7 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
-import { useLoginMutation } from "@/redux/api/authApi";
+import {
+  useGenerateOtpForPasswordMutation,
+  useLoginMutation,
+} from "@/redux/api/authApi";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import SocialAuth from "@/components/SocialAuth";
@@ -23,8 +26,12 @@ const LoginPage = () => {
     register,
     handleSubmit,
     formState: { errors },
+    getValues,
   } = useForm<LoginFormValues>();
   const [login, { isLoading, error }] = useLoginMutation();
+  const [generateOtp, { isLoading: isOtpLoading }] =
+    useGenerateOtpForPasswordMutation();
+
   const dispatch = useAppDispatch();
   const router = useRouter();
 
@@ -49,7 +56,38 @@ const LoginPage = () => {
     }
   };
 
-  console.log(error);
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const email = getValues("email");
+
+    if (!email) {
+      toast.error("Please enter your email before resetting your password.");
+      return;
+    }
+
+    try {
+      await generateOtp({ email }).unwrap();
+      toast.success("OTP sent to your email!");
+      router.push(
+        `/auth/login/reset-password?email=${encodeURIComponent(email)}`
+      );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      const message =
+        err?.data?.errorSources?.[0]?.message ||
+        err?.data?.message ||
+        "Failed to send OTP";
+
+      toast.error(message);
+    }
+  };
+
+  if (error) {
+    console.log("Login error");
+    console.log(error);
+    return <div className="text-red-400">An error has occured</div>;
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-zinc-900 to-neutral-950 text-white">
       <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 rounded-2xl  overflow-hidden border border-gray-800 bg-dark-elevated/80 backdrop-blur-2xl backdrop-saturate-150 transition-all duration-300 shadow-[0_0_40px_-10px_rgba(111,45,168,0.6)]">
@@ -128,6 +166,17 @@ const LoginPage = () => {
                   {errors.password.message}
                 </p>
               )}
+
+              {/* Forgot Password Link */}
+              <div className="flex justify-end pt-1">
+                <button
+                  onClick={handleForgotPassword}
+                  disabled={isOtpLoading}
+                  className="text-xs text-gray-400 hover:text-white transition underline disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isOtpLoading ? "Sending OTP..." : "Forgot password?"}
+                </button>
+              </div>
             </div>
 
             <Button

@@ -27,14 +27,21 @@ export const authApi = baseApi.injectEndpoints({
     }),
     generateOtp: builder.mutation({
       query: (email) => ({
-        url: "auth/signup/generate-otp",
+        url: "auth/generate-otp",
+        method: "POST",
+        body: email,
+      }),
+    }),
+    generateOtpForPassword: builder.mutation({
+      query: (email) => ({
+        url: "auth/forgot-password/generate-otp",
         method: "POST",
         body: email,
       }),
     }),
     verifyOtp: builder.mutation({
       query: (credentials) => ({
-        url: "auth/signup/verify-otp",
+        url: "auth/verify-otp",
         method: "POST",
         body: credentials,
       }),
@@ -56,5 +63,6 @@ export const {
   useSignupMutation,
   useRefreshTokenMutation,
   useGenerateOtpMutation,
+  useGenerateOtpForPasswordMutation,
   useVerifyOtpMutation,
 } = authApi;

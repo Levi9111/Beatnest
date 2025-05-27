@@ -35,7 +35,7 @@ export class AuthService {
       if (existing.isAuthenticated) {
         throw new ConflictException('Email already registered!');
       } else {
-        await this.generateOtp({ email: dto.email });
+        await this.generateOtp({ email: dto.email }, 'emailVerification');
         return {
           message:
             'User already exists but not verified. OTP resent to the email.',
@@ -62,7 +62,10 @@ export class AuthService {
     );
   }
 
-  async generateOtp(dto: GenerateOtpDto) {
+  async generateOtp(
+    dto: GenerateOtpDto,
+    action: 'emailVerification' | 'passwordReset',
+  ) {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
     const hashedOtp = await bcrypt.hash(
@@ -70,11 +73,41 @@ export class AuthService {
       Number(this.config.get<string>('BCRYPT_SALT_ROUNDS')!),
     );
 
+    let html = '';
+    let subject = '';
+
+    if (action === 'emailVerification') {
+      subject = 'Your Email verification code.';
+      html = `
+    <p>Hello,</p>
+    <p>Your Beatnest email verification code is: <span style="display:inline-block; background:#f0f4ff; color:#1a237e; font-size:1.35em; font-weight:bold; letter-spacing:2px; padding:8px 18px; border-radius:6px; border:1px solid #c5cae9;">
+    ${otp}
+    </span></p>
+    <p>Please enter this code in the app to verify your email address.</p>
+    <br/>
+    <p>Thank you,<br/>The Beatnest Team</p>
+  `;
+    } else if (action === 'passwordReset') {
+      subject = 'Your Beatnest password reset verification code.';
+      html = `
+    <p>Hello,</p>
+    <p>We received a request to reset your Beatnest password.</p>
+    <p>Your password reset code is: <span style="display:inline-block; background:#f0f4ff; color:#1a237e; font-size:1.35em; font-weight:bold; letter-spacing:2px; padding:8px 18px; border-radius:6px; border:1px solid #c5cae9;">
+    ${otp}
+    </span></p>
+    <p>If you did not request this, please ignore this email.</p>
+    <br/>
+    <p>Thank you,<br/>The Beatnest Team</p>
+  `;
+    } else {
+      html = `<p>Invalid action.</p>`;
+    }
+
     await transporter().sendMail({
       from: this.config.get<string>('beatnest.team@gmail.com'),
       to: dto.email,
-      subject: 'Your Email verification code.',
-      html: `<p>Your Beatnest email verification code is: <b>${otp}</b></p>`,
+      subject,
+      html,
     });
 
     await this.userModel.findOneAndUpdate(

@@ -51,16 +51,19 @@ export class AuthController {
     };
   }
 
-  @Post('signup/generate-otp')
-  @UseGuards(JwtAuthGuard, RoleGuards)
-  @Roles(UserRole.USER, UserRole.ARTIST, UserRole.ADMIN)
+  @Post('generate-otp')
   async generateOtp(@Body() dto: GenerateOtpDto) {
-    await this.authService.generateOtp(dto);
+    await this.authService.generateOtp(dto, 'emailVerification');
   }
 
-  @Post('signup/verify-otp')
-  @UseGuards(JwtAuthGuard, RoleGuards)
-  @Roles(UserRole.USER, UserRole.ARTIST, UserRole.ADMIN)
+  @Post('forgot-password/generate-otp')
+  async generateOtpForPassword(@Body() dto: GenerateOtpDto) {
+    await this.authService.generateOtp(dto, 'passwordReset');
+  }
+
+  @Post('verify-otp')
+  // @UseGuards(JwtAuthGuard, RoleGuards)
+  // @Roles(UserRole.USER, UserRole.ARTIST, UserRole.ADMIN)
   async verifyOtp(
     @Body() dto: VerifyOtpDto,
     @Res({ passthrough: true }) res: Response,
