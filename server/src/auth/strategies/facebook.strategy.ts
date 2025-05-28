@@ -1,22 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
-import {
-  Strategy,
-  StrategyOptions,
-  VerifyCallback,
-} from 'passport-google-oauth20';
+
 import { SocialUser } from '../interfaces/current-user.interface';
+import { Strategy } from 'passport-facebook';
+import { VerifyCallback } from 'passport-oauth2';
 
 @Injectable()
 export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
   constructor(private readonly config: ConfigService) {
     super({
-      clientID: config.get<string>('FACEBOOK_CLIENT_ID'),
-      clientSecret: config.get<string>('FACEBOOK_CLIENT_SECRET'),
-      callbackURL: config.get<string>('FACEBOOK_CALLBACK_URL'),
+      clientID: config.get<string>('FACEBOOK_CLIENT_ID')!,
+      clientSecret: config.get<string>('FACEBOOK_CLIENT_SECRET')!,
+      callbackURL: config.get<string>('FACEBOOK_CALLBACK_URL')!,
       profileFields: ['id', 'email', 'name'],
-    } as StrategyOptions);
+      scope: ['email'],
+    });
   }
 
   validate(

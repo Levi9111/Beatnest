@@ -7,6 +7,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { ConfigService } from '@nestjs/config';
 import * as cookieParser from 'cookie-parser';
+import * as passport from 'passport';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -25,6 +26,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   app.useGlobalFilters(new HttpExceptionFilter(configService));
   app.use(cookieParser());
+  app.use(passport.initialize());
   await app.listen(process.env.PORT ?? 5000);
 }
 bootstrap();

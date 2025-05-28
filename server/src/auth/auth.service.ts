@@ -156,10 +156,13 @@ export class AuthService {
   async login(dto: LoginDto) {
     const user = await this.userService.findByEmail(dto.email);
 
-    if (!user) throw new BadRequestException('User not found');
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
 
-    if (!(await bcrypt.compare(dto.password, user.password)))
+    if (!(await bcrypt.compare(dto.password, user?.password as string))) {
       throw new UnauthorizedException('incorrect password');
+    }
 
     return this.genrateTokens(
       user._id as string,

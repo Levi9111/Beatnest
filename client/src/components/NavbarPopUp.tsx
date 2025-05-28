@@ -15,6 +15,7 @@ import { useGetMeQuery } from "@/redux/api/authApi";
 import { useAppDispatch } from "@/redux/hooks";
 import { clearAccessToken } from "@/redux/slices/authSlice";
 import { useRouter } from "next/navigation";
+import { generateColorFromString, getInitials } from "@/utils";
 
 const NavbarPopUp = () => {
   const [open, setOpen] = useState(false);
@@ -34,7 +35,18 @@ const NavbarPopUp = () => {
         onClick={() => setOpen((prev) => !prev)}
         className="cursor-pointer flex items-center gap-1"
       >
-        <User size={28} className="text-gray-300" />
+        {myInfo?.name ? (
+          <div
+            className="w-9 h-9 flex items-center justify-center rounded-full text-white font-semibold text-sm"
+            style={{
+              backgroundColor: generateColorFromString(myInfo.name),
+            }}
+          >
+            {getInitials(myInfo.name)}
+          </div>
+        ) : (
+          <User size={28} className="text-gray-300" />
+        )}
       </div>
 
       <AnimatePresence>

@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
-import { CreateUserDto, UserRole } from 'src/users/dto/create-user.dto';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { Request, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
@@ -18,7 +18,6 @@ import { SocialUser } from './interfaces/current-user.interface';
 import { JwtAuthGuard } from 'src/jwt/guards/jwt-auth.guard';
 import { GenerateOtpDto } from './dto/generate-otp.dto';
 import { RoleGuards } from 'src/jwt/guards/roles.guard';
-import { Roles } from './decorators/roles.decorator';
 import { VerifyOtpDto } from './dto/verrify-otp.dto';
 
 @Controller('auth')
@@ -62,8 +61,6 @@ export class AuthController {
   }
 
   @Post('verify-otp')
-  // @UseGuards(JwtAuthGuard, RoleGuards)
-  // @Roles(UserRole.USER, UserRole.ARTIST, UserRole.ADMIN)
   async verifyOtp(
     @Body() dto: VerifyOtpDto,
     @Res({ passthrough: true }) res: Response,
@@ -117,18 +114,13 @@ export class AuthController {
 
     const tokens = await this.authService.socialLogin(user);
 
-    res.cookie('accessToken', tokens.accessToken, {
-      httpOnly: true,
-      secure: this.config.get<string>('NODE_ENV') === 'production',
-    });
-
     res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
       secure: this.config.get<string>('NODE_ENV') === 'production',
     });
 
     return res.redirect(
-      `${this.config.get<string>('CLIENT_URL')}/oauth-success`,
+      `${this.config.get<string>('CLIENT_URL')}/oauth-success?accessToken=${tokens.accessToken}`,
     );
   }
 
@@ -140,14 +132,10 @@ export class AuthController {
   @Get('facebook/callback')
   @UseGuards(AuthGuard('facebook'))
   async facebookCallback(@Req() req: Request, @Res() res: Response) {
+    console.log('facebook callback');
     const user = req.user as SocialUser;
 
     const tokens = await this.authService.socialLogin(user);
-
-    res.cookie('accessToken', tokens.accessToken, {
-      httpOnly: true,
-      secure: this.config.get<string>('NODE_ENV') === 'production',
-    });
 
     res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
@@ -155,13 +143,12 @@ export class AuthController {
     });
 
     return res.redirect(
-      `${this.config.get<string>('CLIENT_URL')}/oauth-success`,
+      `${this.config.get<string>('CLIENT_URL')}/oauth-success?accessToken=${tokens.accessToken}`,
     );
   }
 
   @Get('me')
   @UseGuards(JwtAuthGuard, RoleGuards)
-  @Roles(UserRole.USER, UserRole.ARTIST, UserRole.ADMIN)
   me(@Req() req: Request) {
     return req.user;
   }

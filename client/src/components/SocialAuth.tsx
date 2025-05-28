@@ -4,11 +4,19 @@ import { Fragment } from "react";
 const SocialAuth = () => {
   return (
     <Fragment>
-      <SocialButton icon={<Google size={20} />} label="Sign up with Google" />
-      <SocialButton
-        icon={<Facebook size={20} className="text-blue-500" />}
-        label="Sign up with Facebook"
-      />
+      <a href="http://localhost:5000/auth/google">
+        <SocialButton icon={<Google size={20} />} label="Sign up with Google" />
+      </a>
+
+      {/* TODO: */}
+      {/* Test facebook login after production */}
+      <a href="http://localhost:5000/auth/facebook">
+        <SocialButton
+          icon={<Facebook size={20} className="text-blue-500" />}
+          label="Sign up with Facebook"
+        />
+      </a>
+
       <SocialButton
         icon={<AppleLight size={20} />}
         label="Sign up with Apple"
