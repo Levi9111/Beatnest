@@ -9,6 +9,7 @@ import {
   LogOut,
   Mail,
   LogIn,
+  UserCircle,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGetMeQuery } from "@/redux/api/authApi";
@@ -16,6 +17,7 @@ import { useAppDispatch } from "@/redux/hooks";
 import { clearAccessToken } from "@/redux/slices/authSlice";
 import { useRouter } from "next/navigation";
 import { generateColorFromString, getInitials } from "@/utils";
+import Link from "next/link";
 
 const NavbarPopUp = () => {
   const [open, setOpen] = useState(false);
@@ -68,8 +70,16 @@ const NavbarPopUp = () => {
                   </p>
                 </div>
                 <ul className="text-sm text-gray-300">
+                  <li>
+                    <Link
+                      href="/profile"
+                      className="flex items-center gap-2 px-4 py-2 hover:bg-gray-800 cursor-pointer"
+                    >
+                      <UserCircle size={16} /> Profile
+                    </Link>
+                  </li>
                   <li className="flex items-center gap-2 px-4 py-2 hover:bg-gray-800 cursor-pointer">
-                    <History size={16} /> Listening History
+                    <History size={16} /> History
                   </li>
                   <li className="flex items-center gap-2 px-4 py-2 hover:bg-gray-800 cursor-pointer">
                     <Settings size={16} /> Settings
