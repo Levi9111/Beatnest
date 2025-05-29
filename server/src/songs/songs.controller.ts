@@ -36,8 +36,8 @@ export class SongsController {
     private readonly cloudinaryService: UploadService,
   ) {}
 
-  @Post()
-  @Roles(UserRole.ARTIST)
+  @Post('create')
+  @Roles(UserRole.ARTIST, UserRole.USER)
   @UseInterceptors(
     FileFieldsInterceptor(
       [
@@ -93,6 +93,7 @@ export class SongsController {
     const audioFile = files.audio?.[0];
     if (!audioFile) throw new BadRequestException('Audio file is required');
     const imageFile = files.image?.[0];
+    if (!imageFile) throw new BadRequestException('Image file is required');
 
     // Upload to cloudinary
     const audioUpload = await this.cloudinaryService.uploadFromDisk(
@@ -101,20 +102,17 @@ export class SongsController {
       'video',
     );
 
-    let imageUpload: { secure_url: string } | undefined;
-    if (imageFile) {
-      imageUpload = await this.cloudinaryService.uploadFromDisk(
-        imageFile.path,
-        'uploads/covers',
-        'image',
-      );
-    }
+    const imageUpload = await this.cloudinaryService.uploadFromDisk(
+      imageFile.path,
+      'uploads/covers',
+      'image',
+    );
 
     return this.songsService.create(
       createSongDto,
       user._id,
       audioUpload.secure_url,
-      imageUpload?.secure_url,
+      imageUpload.secure_url,
     );
   }
 

@@ -13,7 +13,7 @@ export class Song {
   audioUrl: string;
 
   @Prop()
-  imageUrl?: string;
+  imageUrl: string;
 
   @Prop({ type: Types.ObjectId, ref: 'User' })
   uploadedBy: Types.ObjectId;

@@ -1,3 +1,4 @@
+"use client";
 import { baseApi } from "./baseApi";
 
 export const userApi = baseApi.injectEndpoints({
@@ -11,7 +12,6 @@ export const userApi = baseApi.injectEndpoints({
     }),
     resetPassword: builder.mutation({
       query: (credentials) => {
-        console.log(credentials);
         return {
           url: "users",
           method: "PATCH",
@@ -23,7 +23,12 @@ export const userApi = baseApi.injectEndpoints({
       query: () => "users",
     }),
     getUserById: builder.query({
-      query: ({ id }) => `users/${id}`,
+      query: (userId) => {
+        console.log(userId);
+        return {
+          url: `users/${userId}`,
+        };
+      },
     }),
     getUserByEmail: builder.mutation({
       query: ({ email }) => ({

@@ -58,7 +58,7 @@ const NavbarPopUp = () => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute right-0 mt-6 w-64 bg-dark-elevated border border-gray-700 rounded-lg shadow-lg overflow-hidden z-50"
+            className="absolute right-0 mt-6 w-64 bg-dark-elevated border border-gray-700 bg-[#121212] rounded-lg shadow-lg overflow-hidden z-50"
           >
             {myInfo?.email ? (
               <>

@@ -40,6 +40,11 @@ export class UsersService {
   }
 
   async updateUser(id: string, dto: UpdateUserDto): Promise<UserDocument> {
+    if (dto.userName) {
+      if (!dto.userName.startsWith('@')) {
+        dto.userName = `@${dto.userName}`;
+      }
+    }
     const updateUser = await this.userModel
       .findByIdAndUpdate(id, dto, { new: true })
       .exec();

@@ -55,6 +55,13 @@ export class User {
 
   @Prop({
     type: [Types.ObjectId],
+    ref: 'User',
+    default: [],
+  })
+  followingArtists: UserDocument[];
+
+  @Prop({
+    type: [Types.ObjectId],
     default: [],
   })
   likedSongs: Types.ObjectId[];

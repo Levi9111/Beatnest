@@ -17,7 +17,7 @@ export class SongsService {
     createSongDto: CreateSongDto,
     uploadedBy: Types.ObjectId,
     audioUrl: string,
-    imageUrl?: string,
+    imageUrl: string,
   ): Promise<SongDocumet> {
     const newSong = await this.songModel.create({
       ...createSongDto,

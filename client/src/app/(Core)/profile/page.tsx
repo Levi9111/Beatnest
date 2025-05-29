@@ -1,7 +1,17 @@
 "use client";
 
-import { useState } from "react";
 import { Upload, Heart, Users, Music, Image as ImageIcon } from "lucide-react"; // Added ImageIcon for placeholders
+import { useGetMeQuery } from "@/redux/api/authApi";
+import { useGetUserByIdQuery } from "@/redux/api/userApi";
+import { useForm } from "react-hook-form";
+import { useState } from "react";
+import { useUploadSongMutation } from "@/redux/api/uploadSongApi";
+
+interface SongUploadFormValues {
+  title: string;
+  audio: FileList;
+  cover: FileList;
+}
 
 // Dummy data for the user and carousel items
 const demoUser = {
@@ -151,7 +161,21 @@ const Carousel = ({ title, items, icon: Icon }) => {
 };
 
 const ProfilePage = () => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<SongUploadFormValues>();
+  const { data: myInfo } = useGetMeQuery(undefined);
+  const [uploadSong, { isLoading: isUploadSongLoading }] =
+    useUploadSongMutation();
+  const [previewCover, setPreviewCover] = useState<string | null>(null);
   const [profileImage, setProfileImage] = useState(demoUser.image);
+
+  const { userId } = myInfo || {};
+  const { data: userData, isLoading: isUserDataLoading } =
+    useGetUserByIdQuery(userId);
 
   const handleImageUpload = (e) => {
     if (e.target.files?.[0]) {
@@ -162,6 +186,55 @@ const ProfilePage = () => {
         }
       };
       reader.readAsDataURL(e.target.files[0]);
+    }
+  };
+
+  // TODO:
+  // Change the loader ui and update it similar to ouah-success page
+  if (isUserDataLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#121212] text-white p-6 sm:p-8 lg:p-12 font-inter">
+        <div className="flex flex-col items-center space-y-4">
+          <svg
+            className="animate-spin h-10 w-10 text-[#6f2da8]"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            ></circle>
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+            ></path>
+          </svg>
+          <p className="text-gray-400 text-sm">Loading profile data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const onSubmit = async (data: SongUploadFormValues) => {
+    const formData = new FormData();
+    formData.append("uploadedBy", userData._id);
+    formData.append("title", data.title);
+    formData.append("audio", data.audio[0]);
+    formData.append("cover", data.cover[0]);
+
+    try {
+      await uploadSong(formData).unwrap();
+      reset();
+      setPreviewCover(null);
+      alert("Song uploaded successfully!");
+    } catch (error) {
+      console.error("Upload failed", error);
     }
   };
 
@@ -240,15 +313,18 @@ const ProfilePage = () => {
         />
 
         {/* Upload Song Section */}
-        <section className="bg-gray-900 p-8 rounded-xl shadow-2xl border border-gray-700">
-          <h3 className="text-2xl font-bold flex items-center gap-3 text-[#6f2da8] mb-6">
-            <Music size={24} className="text-[#6f2da8]" /> Upload Your Music
+        <section className="bg-gray-900 p-8 rounded-xl shadow-2xl border border-gray-700  mx-auto">
+          <h3 className="text-2xl font-bold flex items-center gap-3 text-[#6f2da8] mb-8">
+            <Music size={24} className="text-[#6f2da8]" />
+            Upload Your Music
           </h3>
-          <form className="space-y-6">
-            <div>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            {/* Song Title */}
+            <div className="flex flex-col gap-2">
               <label
                 htmlFor="song-title"
-                className="block text-gray-300 text-sm font-medium mb-2"
+                className="text-gray-300 text-sm font-medium"
               >
                 Song Title
               </label>
@@ -256,13 +332,21 @@ const ProfilePage = () => {
                 id="song-title"
                 type="text"
                 placeholder="Enter song title"
+                {...register("title", { required: "Song title is required" })}
                 className="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:ring-2 focus:ring-[#6f2da8] focus:border-transparent transition-all duration-200"
               />
+              {errors.title && (
+                <span className="text-red-500 text-sm">
+                  {errors.title.message}
+                </span>
+              )}
             </div>
-            <div>
+
+            {/* Audio File */}
+            <div className="flex flex-col gap-2">
               <label
                 htmlFor="audio-file"
-                className="block text-gray-300 text-sm font-medium mb-2"
+                className="text-gray-300 text-sm font-medium"
               >
                 Audio File (MP3, WAV, etc.)
               </label>
@@ -270,15 +354,64 @@ const ProfilePage = () => {
                 id="audio-file"
                 type="file"
                 accept="audio/*"
-                className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#6f2da8] file:text-white hover:file:bg-[#5c248a] transition-colors duration-200 cursor-pointer"
+                {...register("audio", { required: "Audio file is required" })}
+                className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#6f2da8] file:text-white hover:file:bg-[#5c248a] transition-colors duration-200 cursor-pointer"
               />
+              {errors.audio && (
+                <span className="text-red-500 text-sm">
+                  {errors.audio.message}
+                </span>
+              )}
             </div>
-            <button
-              type="submit"
-              className="w-full sm:w-auto bg-[#6f2da8] hover:bg-[#5c248a] text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-[#6f2da8] focus:ring-offset-2 focus:ring-offset-gray-900"
-            >
-              Upload Song
-            </button>
+
+            {/* Cover Image */}
+            <div className="flex flex-col gap-2">
+              <label
+                htmlFor="cover-image"
+                className="text-gray-300 text-sm font-medium"
+              >
+                Cover Image (JPG, PNG, etc.)
+              </label>
+              <input
+                id="cover-image"
+                type="file"
+                accept="image/*"
+                {...register("cover", { required: "Cover image is required" })}
+                className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#6f2da8] file:text-white hover:file:bg-[#5c248a] transition-colors duration-200 cursor-pointer"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setPreviewCover(URL.createObjectURL(file));
+                  }
+                }}
+              />
+              {errors.cover && (
+                <span className="text-red-500 text-sm">
+                  {errors.cover.message}
+                </span>
+              )}
+            </div>
+
+            {previewCover && (
+              <div>
+                <img
+                  src={previewCover}
+                  alt="Cover Preview"
+                  className="mt-2 w-32 rounded-md"
+                />
+              </div>
+            )}
+
+            {/* Submit */}
+            <div className="pt-4">
+              <button
+                type="submit"
+                disabled={isUploadSongLoading}
+                className="w-full sm:w-auto bg-[#6f2da8] hover:bg-[#5c248a] text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-[#6f2da8] focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50"
+              >
+                {isUploadSongLoading ? "Uploading..." : "Upload Song"}
+              </button>
+            </div>
           </form>
         </section>
       </div>

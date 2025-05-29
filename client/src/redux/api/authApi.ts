@@ -1,3 +1,4 @@
+"use client";
 import { baseApi } from "./baseApi";
 
 export const authApi = baseApi.injectEndpoints({
