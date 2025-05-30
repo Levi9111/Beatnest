@@ -26,7 +26,6 @@ import { JwtAuthGuard } from 'src/jwt/guards/jwt-auth.guard';
 import { RoleGuards } from 'src/jwt/guards/roles.guard';
 
 @Controller('songs')
-@UseGuards(JwtAuthGuard, RoleGuards)
 export class SongsController {
   constructor(
     private readonly songsService: SongsService,
@@ -34,6 +33,7 @@ export class SongsController {
   ) {}
 
   @Post('create')
+  @UseGuards(JwtAuthGuard, RoleGuards)
   @Roles(UserRole.ARTIST, UserRole.USER)
   @UseInterceptors(
     FileFieldsInterceptor(

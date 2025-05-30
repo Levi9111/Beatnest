@@ -19,7 +19,7 @@ const Sidebar = () => {
   const [playlistsOpen, setPlaylistsOpen] = useState(true);
 
   return (
-    <div className="h-[calc(100vh-64px)] md:w-[300px] bg-dark-elevated text-white border-r border-gray-700 sm:flex hidden flex-col justify-between p-4 overflow-y-scroll custom-scroll pb-24">
+    <div className="h-[calc(100vh-64px)] md:w-[300px] bg-dark-elevated text-white border-r border-gray-700 sm:flex hidden flex-col justify-between p-4 overflow-y-scroll custom-scroll pb-28">
       {/* Top Section */}
       <div className="space-y-4">
         <div className="space-y-2">

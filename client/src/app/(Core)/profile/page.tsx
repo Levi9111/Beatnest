@@ -1,12 +1,20 @@
 "use client";
 
-import { Upload, Heart, Users, Music, Image as ImageIcon } from "lucide-react"; // Added ImageIcon for placeholders
+import {
+  Upload,
+  Heart,
+  Users,
+  Music,
+  Image as ImageIcon,
+  LucideIcon,
+} from "lucide-react"; // Added ImageIcon for placeholders
 import { useGetMeQuery } from "@/redux/api/authApi";
 import { useGetUserByIdQuery } from "@/redux/api/userApi";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useUploadSongMutation } from "@/redux/api/uploadSongApi";
 import { toast } from "sonner";
+import Image from "next/image";
 
 interface SongUploadFormValues {
   title: string;
@@ -14,8 +22,48 @@ interface SongUploadFormValues {
   cover: FileList;
 }
 
+// --- Types ---
+interface SongUploadFormValues {
+  title: string;
+  audio: FileList;
+  cover: FileList;
+}
+
+interface Artist {
+  id: number;
+  name: string;
+  imageUrl: string;
+}
+
+interface LikedSong {
+  id: number;
+  name: string;
+  artist: string;
+  imageUrl: string;
+}
+
+interface DemoUser {
+  name: string;
+  image: string;
+  following: Artist[];
+  likedSongs: LikedSong[];
+}
+
+// --- Carousel Component ---
+interface CarouselItem {
+  id: number | string;
+  name: string;
+  imageUrl: string;
+  artist?: string;
+}
+interface CarouselProps {
+  title: string;
+  items: CarouselItem[];
+  icon: LucideIcon;
+}
+
 // Dummy data for the user and carousel items
-const demoUser = {
+const demoUser: DemoUser = {
   name: "Shanjid Ahmad",
   image: "", // empty to simulate no profile image
   following: [
@@ -91,7 +139,7 @@ const demoUser = {
 };
 
 // Reusable Carousel Component
-const Carousel = ({ title, items, icon: Icon }) => {
+const Carousel = ({ title, items, icon: Icon }: CarouselProps) => {
   return (
     <section className="space-y-4">
       <h3 className="text-2xl font-bold flex items-center gap-3 text-[#6f2da8]">
@@ -107,7 +155,9 @@ const Carousel = ({ title, items, icon: Icon }) => {
             className="flex-shrink-0 w-40 p-3 bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg shadow-xl cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:bg-gradient-to-br hover:from-gray-700 hover:to-gray-800 group relative overflow-hidden"
           >
             {item.imageUrl ? (
-              <img
+              <Image
+                width={800}
+                height={400}
                 src={item.imageUrl}
                 alt={item.name}
                 className="w-full h-32 object-cover rounded-md mb-3 group-hover:opacity-80 transition-opacity duration-300"
@@ -178,11 +228,11 @@ const ProfilePage = () => {
   const { data: userData, isLoading: isUserDataLoading } =
     useGetUserByIdQuery(userId);
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
       const reader = new FileReader();
       reader.onload = () => {
-        if (reader.result) {
+        if (typeof reader.result === "string") {
           setProfileImage(reader.result);
         }
       };
@@ -252,7 +302,9 @@ const ProfilePage = () => {
         <section className="flex flex-col sm:flex-row items-center gap-8 bg-gray-900 p-8 rounded-xl shadow-2xl border border-gray-700">
           <div className="relative group">
             {profileImage ? (
-              <img
+              <Image
+                width={800}
+                height={600}
                 src={profileImage}
                 alt="Profile"
                 className="w-32 h-32 sm:w-40 sm:h-40 rounded-full object-cover border-4 border-[#6f2da8] shadow-lg transition-all duration-300 group-hover:scale-105 group-hover:border-[#8a4cd0]"
@@ -399,7 +451,9 @@ const ProfilePage = () => {
 
             {previewCover && (
               <div>
-                <img
+                <Image
+                  width={800}
+                  height={600}
                   src={previewCover}
                   alt="Cover Preview"
                   className="mt-2 w-32 rounded-md"

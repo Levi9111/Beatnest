@@ -9,6 +9,13 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/**",
       },
+      // TODO: remove later
+      {
+        protocol: "https",
+        hostname: "placehold.co",
+        port: "",
+        pathname: "/**",
+      },
     ],
   },
 };
