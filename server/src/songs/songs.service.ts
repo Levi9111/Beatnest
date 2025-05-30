@@ -17,13 +17,13 @@ export class SongsService {
     createSongDto: CreateSongDto,
     uploadedBy: Types.ObjectId,
     audioUrl: string,
-    imageUrl: string,
+    coverImageUrl: string,
   ): Promise<SongDocumet> {
     const newSong = await this.songModel.create({
       ...createSongDto,
       uploadedBy,
       audioUrl,
-      imageUrl,
+      coverImageUrl,
     });
 
     return newSong;

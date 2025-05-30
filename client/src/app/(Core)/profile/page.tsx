@@ -6,6 +6,7 @@ import { useGetUserByIdQuery } from "@/redux/api/userApi";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useUploadSongMutation } from "@/redux/api/uploadSongApi";
+import { toast } from "sonner";
 
 interface SongUploadFormValues {
   title: string;
@@ -223,18 +224,22 @@ const ProfilePage = () => {
 
   const onSubmit = async (data: SongUploadFormValues) => {
     const formData = new FormData();
-    formData.append("uploadedBy", userData._id);
     formData.append("title", data.title);
     formData.append("audio", data.audio[0]);
-    formData.append("cover", data.cover[0]);
+    formData.append("image", data.cover[0]);
+
+    console.log(userData);
 
     try {
-      await uploadSong(formData).unwrap();
+      const result = await uploadSong(formData).unwrap();
       reset();
+
+      console.log(result);
       setPreviewCover(null);
-      alert("Song uploaded successfully!");
+      toast.success("Song uploaded successfully");
     } catch (error) {
       console.error("Upload failed", error);
+      toast.warning("Failed to upload song!");
     }
   };
 

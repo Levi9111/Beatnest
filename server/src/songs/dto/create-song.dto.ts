@@ -1,10 +1,4 @@
-import {
-  IsBoolean,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateSongDto {
   @IsString()
@@ -14,10 +8,6 @@ export class CreateSongDto {
   @IsString()
   @IsOptional()
   description?: string;
-
-  @IsBoolean()
-  @IsOptional()
-  isPaid?: boolean;
 
   @IsNumber()
   @IsOptional()

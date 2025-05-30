@@ -11,7 +11,11 @@ export const uploadSongApi = baseApi.injectEndpoints({
         body: formdata,
       }),
     }),
+
+    getAllSongs: builder.query({
+      query: () => "songs",
+    }),
   }),
 });
 
-export const { useUploadSongMutation } = uploadSongApi;
+export const { useUploadSongMutation, useGetAllSongsQuery } = uploadSongApi;

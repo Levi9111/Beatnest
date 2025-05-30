@@ -3,7 +3,7 @@ import { UserRole } from 'src/users/schemas/users.const';
 
 export interface CurrentUserPayload {
   _id: Types.ObjectId;
-  userId: string;
+  userId: Types.ObjectId;
   email: string;
   role: UserRole;
   isAuthenticated: boolean;

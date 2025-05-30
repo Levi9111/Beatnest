@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
   BadRequestException,
   Body,
@@ -110,7 +107,7 @@ export class SongsController {
 
     return this.songsService.create(
       createSongDto,
-      user._id,
+      user.userId,
       audioUpload.secure_url,
       imageUpload.secure_url,
     );

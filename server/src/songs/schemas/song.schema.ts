@@ -3,23 +3,20 @@ import { Types } from 'mongoose';
 
 @Schema()
 export class Song {
-  @Prop({ required: true })
+  @Prop({ required: true, trim: true })
   title: string;
 
-  @Prop()
+  @Prop({ trim: true })
   description?: string;
 
   @Prop({ required: true })
   audioUrl: string;
 
-  @Prop()
-  imageUrl: string;
+  @Prop({ required: true })
+  coverImageUrl: string;
 
-  @Prop({ type: Types.ObjectId, ref: 'User' })
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   uploadedBy: Types.ObjectId;
-
-  @Prop({ default: false })
-  isPaid: boolean;
 
   @Prop({ default: 0 })
   price: number;
@@ -34,6 +31,17 @@ export class Song {
     default: [],
   })
   purchasedBy: Types.ObjectId[];
+
+  @Prop({ default: 0 })
+  playCount: number;
+
+  @Prop({ default: 0 })
+  likes: number;
+
+  @Prop({
+    type: [{ type: Types.ObjectId, ref: 'User' }],
+  })
+  likedBy: Types.ObjectId[];
 }
 
 export type SongDocumet = Song & Document;
