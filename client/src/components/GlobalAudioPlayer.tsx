@@ -17,6 +17,7 @@ import { RootState } from "@/redux/store";
 import { setVolume, togglePlayPause } from "@/redux/slices/audioPlayerSlice";
 import Image from "next/image";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+
 const GlobalAudioPlayer = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const dispatch = useAppDispatch();
