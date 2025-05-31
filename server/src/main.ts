@@ -14,12 +14,14 @@ async function bootstrap() {
 
   app.enableCors({
     origin: (origin, callback) => {
-      console.log('Incoming origin:', origin);
-      callback(null, process.env.CLIENT_URL === origin ? true : false);
+      const allowedOrigins = ['https://beatnest-eight.vercel.app'];
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
     },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
   });
 
   app.useStaticAssets(join(__dirname, '..', 'uploads'));
