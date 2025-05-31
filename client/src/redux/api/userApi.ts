@@ -4,8 +4,8 @@ import { baseApi } from "./baseApi";
 export const userApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     updateUserInfo: builder.mutation({
-      query: ({ id, ...data }) => ({
-        url: `users/${id}`,
+      query: (data) => ({
+        url: `users/update-info`,
         method: "PATCH",
         body: data,
       }),

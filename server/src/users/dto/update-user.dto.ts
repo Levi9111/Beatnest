@@ -1,21 +1,20 @@
 import {
+  IsArray,
+  IsBoolean,
+  IsDateString,
   IsEmail,
   IsEnum,
+  IsMongoId,
   IsOptional,
   IsString,
   MinLength,
 } from 'class-validator';
-
-export enum UserRole {
-  USER = 'user',
-  ARTIST = 'artist',
-  ADMIN = 'admin',
-}
+import { UserRole } from './create-user.dto';
 
 export class UpdateUserDto {
   @IsString()
   @IsOptional()
-  name: string;
+  name?: string;
 
   @IsString()
   @IsOptional()
@@ -23,22 +22,66 @@ export class UpdateUserDto {
 
   @IsEmail()
   @IsOptional()
-  email: string;
+  email?: string;
 
   @IsString()
   @IsOptional()
-  provider: string;
+  imageUrl?: string;
 
   @IsString()
   @IsOptional()
-  providerId: string;
+  about?: string;
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  likedGenres?: string[];
 
   @MinLength(6)
-  // @IsStrongPassword()
   @IsOptional()
-  password: string;
+  password?: string;
+
+  @IsString()
+  @IsOptional()
+  provider?: string;
+
+  @IsString()
+  @IsOptional()
+  providerId?: string;
 
   @IsEnum(UserRole)
   @IsOptional()
   role?: UserRole;
+
+  @IsString()
+  @IsOptional()
+  otp?: string | null;
+
+  @IsDateString()
+  @IsOptional()
+  otpExpiresAt?: string | null;
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  purchasedSongs?: string[];
+
+  @IsArray()
+  @IsMongoId({ each: true })
+  @IsOptional()
+  likedPlaylists?: string[]; // Array of Playlist IDs
+
+  @IsArray()
+  @IsMongoId({ each: true })
+  @IsOptional()
+  followingArtists?: string[]; // Array of User IDs
+
+  @IsArray()
+  @IsMongoId({ each: true })
+  @IsOptional()
+  likedSongs?: string[]; // Array of Song IDs
+
+  @IsBoolean()
+  @IsOptional()
+  isAuthenticated?: boolean;
 }

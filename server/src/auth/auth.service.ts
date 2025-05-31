@@ -18,6 +18,7 @@ import { User, UserDocument } from 'src/users/schemas/user.schema';
 import { Model } from 'mongoose';
 import { GenerateOtpDto } from './dto/generate-otp.dto';
 import { VerifyOtpDto } from './dto/verrify-otp.dto';
+import { generateDefauleUserName } from 'src/utils/generateDefaultUserName';
 @Injectable()
 export class AuthService {
   constructor(
@@ -238,9 +239,12 @@ export class AuthService {
     let user = await this.userService.findByEmail(oauthUser.email);
 
     if (!user) {
+      const defaultUserName = generateDefauleUserName(oauthUser.name);
+
       user = await this.userService.createUser({
         email: oauthUser.email,
         name: oauthUser.name,
+        userName: defaultUserName,
         provider: oauthUser.provider,
         providerId: oauthUser.providerId,
         password: '',

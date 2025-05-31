@@ -19,6 +19,12 @@ export class User {
   @Prop({ required: true, unique: true })
   email: string;
 
+  @Prop({ default: null, sparse: true })
+  about?: string;
+
+  @Prop({ default: [] })
+  likedGenres: string[];
+
   // TODO:
   // Very important: later make password optional only for socail login
 

@@ -14,6 +14,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { UserRole } from './dto/create-user.dto';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import { CurrentUserPayload } from 'src/auth/interfaces/current-user.interface';
 
 @Controller('users')
 export class UsersController {
@@ -58,11 +60,16 @@ export class UsersController {
     };
   }
 
-  @Patch(':id')
+  @Patch('update-info')
   @UseGuards(JwtAuthGuard, RoleGuards)
   @Roles(UserRole.ADMIN, UserRole.ARTIST, UserRole.USER)
-  async update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
-    const result = await this.usersService.updateUser(id, dto);
+  async update(
+    @CurrentUser() user: CurrentUserPayload,
+    @Body() dto: UpdateUserDto,
+  ) {
+    console.log(user);
+    console.log(dto);
+    const result = await this.usersService.updateUser(user.userId, dto);
 
     return {
       success: true,

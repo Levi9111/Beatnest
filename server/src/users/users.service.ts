@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './schemas/user.schema';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -39,19 +39,47 @@ export class UsersService {
     return this.userModel.find().exec();
   }
 
-  async updateUser(id: string, dto: UpdateUserDto): Promise<UserDocument> {
+  async updateUser(
+    id: Types.ObjectId,
+    dto: UpdateUserDto,
+  ): Promise<UserDocument> {
     if (dto.userName) {
       if (!dto.userName.startsWith('@')) {
         dto.userName = `@${dto.userName}`;
       }
     }
-    const updateUser = await this.userModel
-      .findByIdAndUpdate(id, dto, { new: true })
-      .exec();
 
-    if (!updateUser) throw new NotFoundException('User not found');
+    const existingUser = await this.userModel.findById(id);
 
-    return updateUser;
+    if (!existingUser) throw new NotFoundException('User not found');
+
+    const arrayFieldsToMerge: (keyof UpdateUserDto)[] = [
+      'likedGenres',
+      'likedSongs',
+      'followingArtists',
+      'likedPlaylists',
+      'purchasedSongs',
+    ];
+
+    for (const field of arrayFieldsToMerge) {
+      const incomingValues = dto[field];
+      const currentValues = existingUser[field];
+
+      if (Array.isArray(incomingValues) && Array.isArray(currentValues)) {
+        const merged = Array.from(
+          new Set([...currentValues, ...incomingValues]),
+        );
+        dto[field as string] = merged;
+      }
+    }
+
+    const updatedUser = await this.userModel.findByIdAndUpdate(id, dto, {
+      new: true,
+    });
+
+    if (!updatedUser) throw new NotFoundException('User not found');
+
+    return updatedUser;
   }
 
   async resetPassword(dto: ResetPasswordDto) {

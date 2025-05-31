@@ -11,8 +11,6 @@ const HomeContents = () => {
   const { data: songs, isLoading, isError } = useGetAllSongsQuery(undefined);
   const dispatch = useAppDispatch();
 
-  console.log(songs);
-
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col justify-center items-center text-white animate-pulse">

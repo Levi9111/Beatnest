@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  Upload,
-  Heart,
-  Users,
-  Music,
-  Image as ImageIcon,
-  LucideIcon,
-} from "lucide-react"; // Added ImageIcon for placeholders
+import { Upload, Heart, Users, Music, User, Headphones } from "lucide-react"; // Added ImageIcon for placeholders
 import { useGetMeQuery } from "@/redux/api/authApi";
 import { useGetUserByIdQuery } from "@/redux/api/userApi";
 import { useForm } from "react-hook-form";
@@ -15,6 +8,8 @@ import { useState } from "react";
 import { useUploadSongMutation } from "@/redux/api/uploadSongApi";
 import { toast } from "sonner";
 import Image from "next/image";
+import { Carousel } from "@/components/Carousel";
+import ProfilePageModal from "@/components/ProfilePageModal";
 
 interface SongUploadFormValues {
   title: string;
@@ -50,17 +45,6 @@ interface DemoUser {
 }
 
 // --- Carousel Component ---
-interface CarouselItem {
-  id: number | string;
-  name: string;
-  imageUrl: string;
-  artist?: string;
-}
-interface CarouselProps {
-  title: string;
-  items: CarouselItem[];
-  icon: LucideIcon;
-}
 
 // Dummy data for the user and carousel items
 const demoUser: DemoUser = {
@@ -138,78 +122,16 @@ const demoUser: DemoUser = {
   ],
 };
 
-// Reusable Carousel Component
-const Carousel = ({ title, items, icon: Icon }: CarouselProps) => {
-  return (
-    <section className="space-y-4">
-      <h3 className="text-2xl font-bold flex items-center gap-3 text-[#6f2da8]">
-        {" "}
-        {/* Changed to velvet purple */}
-        {Icon && <Icon size={24} className="text-[#6f2da8]" />} {title}{" "}
-        {/* Changed to velvet purple */}
-      </h3>
-      <div className="flex overflow-x-auto pb-4 scrollbar-hide space-x-4">
-        {items.map((item) => (
-          <div
-            key={item.id}
-            className="flex-shrink-0 w-40 p-3 bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg shadow-xl cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:bg-gradient-to-br hover:from-gray-700 hover:to-gray-800 group relative overflow-hidden"
-          >
-            {item.imageUrl ? (
-              <Image
-                width={800}
-                height={400}
-                src={item.imageUrl}
-                alt={item.name}
-                className="w-full h-32 object-cover rounded-md mb-3 group-hover:opacity-80 transition-opacity duration-300"
-              />
-            ) : (
-              <div className="w-full h-32 flex items-center justify-center bg-gray-700 rounded-md mb-3">
-                <ImageIcon size={48} className="text-gray-400" />
-              </div>
-            )}
-            <h4 className="text-lg font-semibold text-white truncate">
-              {item.name}
-            </h4>
-            {item.artist && (
-              <p className="text-sm text-gray-400 truncate">{item.artist}</p>
-            )}
-            {/* Optional: Add a play button overlay on hover */}
-            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg">
-              <button className="p-3 bg-[#6f2da8] rounded-full hover:bg-[#5c248a] transition-colors duration-200">
-                {" "}
-                {/* Changed to velvet purple */}
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="lucide lucide-play"
-                >
-                  <polygon points="5 3 19 12 5 21 5 3" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-      {/* Custom scrollbar styling for better aesthetics */}
-      <style jsx>{`
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-        .scrollbar-hide {
-          -ms-overflow-style: none; /* IE and Edge */
-          scrollbar-width: none; /* Firefox */
-        }
-      `}</style>
-    </section>
-  );
-};
+const genreGradientPalette = [
+  "bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-300 border-purple-400/30",
+  "bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-300 border-blue-400/30",
+  "bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-300 border-green-400/30",
+  "bg-gradient-to-r from-orange-500/20 to-red-500/20 text-orange-300 border-orange-400/30",
+  "bg-gradient-to-r from-yellow-500/20 to-orange-500/20 text-yellow-300 border-yellow-400/30",
+  "bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-indigo-300 border-indigo-400/30",
+  "bg-gradient-to-r from-teal-500/20 to-blue-500/20 text-teal-300 border-teal-400/30",
+  "bg-gradient-to-r from-rose-500/20 to-pink-500/20 text-rose-300 border-rose-400/30",
+];
 
 const ProfilePage = () => {
   const {
@@ -219,14 +141,14 @@ const ProfilePage = () => {
     reset,
   } = useForm<SongUploadFormValues>();
   const { data: myInfo } = useGetMeQuery(undefined);
+  const { data: userData, isLoading: isUserDataLoading } = useGetUserByIdQuery(
+    myInfo?.userId
+  );
   const [uploadSong, { isLoading: isUploadSongLoading }] =
     useUploadSongMutation();
   const [previewCover, setPreviewCover] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [profileImage, setProfileImage] = useState(demoUser.image);
-
-  const { userId } = myInfo || {};
-  const { data: userData, isLoading: isUserDataLoading } =
-    useGetUserByIdQuery(userId);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
@@ -242,43 +164,13 @@ const ProfilePage = () => {
 
   // TODO:
   // Change the loader ui and update it similar to ouah-success page
-  if (isUserDataLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#121212] text-white p-6 sm:p-8 lg:p-12 font-inter">
-        <div className="flex flex-col items-center space-y-4">
-          <svg
-            className="animate-spin h-10 w-10 text-[#6f2da8]"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            ></circle>
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-            ></path>
-          </svg>
-          <p className="text-gray-400 text-sm">Loading profile data...</p>
-        </div>
-      </div>
-    );
-  }
+  if (isUserDataLoading) return <ProfilePageLoader />;
 
   const onSubmit = async (data: SongUploadFormValues) => {
     const formData = new FormData();
     formData.append("title", data.title);
     formData.append("audio", data.audio[0]);
     formData.append("image", data.cover[0]);
-
-    console.log(userData);
 
     try {
       const result = await uploadSong(formData).unwrap();
@@ -296,10 +188,18 @@ const ProfilePage = () => {
   return (
     <div className="min-h-screen bg-[#121212] text-white p-6 sm:p-8 lg:p-12 font-inter animate-fadeIn">
       {" "}
-      {/* Base background and text color updated */}
+      <ProfilePageModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        defaultValues={{
+          userName: userData?.data?.userName,
+          about: userData?.data?.about,
+          likedGenres: userData?.data?.likedGenres,
+        }}
+      />
       <div className="max-w-6xl mx-auto space-y-12">
-        {/* Profile Section */}
-        <section className="flex flex-col sm:flex-row items-center gap-8 bg-gray-900 p-8 rounded-xl shadow-2xl border border-gray-700">
+        {/* Profile Information Section */}
+        <section className="relative flex flex-col sm:flex-row items-center gap-8 bg-gray-900 p-8 rounded-xl shadow-2xl border border-gray-700">
           <div className="relative group">
             {profileImage ? (
               <Image
@@ -312,16 +212,13 @@ const ProfilePage = () => {
             ) : (
               <label className="w-32 h-32 sm:w-40 sm:h-40 flex flex-col items-center justify-center rounded-full bg-gray-800 border-4 border-gray-700 cursor-pointer transition-all duration-300 hover:bg-gray-700 hover:border-[#6f2da8] group-hover:scale-105">
                 {" "}
-                {/* Changed to velvet purple */}
                 <Upload
                   size={32}
                   className="text-gray-400 group-hover:text-[#6f2da8] transition-colors duration-300"
                 />{" "}
-                {/* Changed to velvet purple */}
                 <span className="text-sm text-gray-400 mt-1 group-hover:text-[#6f2da8] transition-colors duration-300">
                   Upload Photo
                 </span>{" "}
-                {/* Changed to velvet purple */}
                 <input
                   type="file"
                   accept="image/*"
@@ -335,24 +232,29 @@ const ProfilePage = () => {
           <div className="text-center sm:text-left">
             <h2 className="text-4xl font-extrabold text-[#6f2da8] mb-2">
               {" "}
-              {/* Changed to velvet purple */}
-              {demoUser.name}
+              {userData?.data.userName || userData?.data.name}
             </h2>
-            <p className="text-lg text-gray-300">Music Lover & Creator</p>
+            {/* About myself section */}
+            <p className="text-lg text-gray-300">{userData.data.about}</p>
             <div className="mt-4 flex flex-wrap justify-center sm:justify-start gap-4">
-              <span className="bg-[#6f2da8]/20 text-[#8a4cd0] px-4 py-1 rounded-full text-sm font-medium">
-                {" "}
-                {/* Changed to velvet purple shades */}
-                #Pop
-              </span>
-              <span className="bg-purple-600/20 text-purple-300 px-4 py-1 rounded-full text-sm font-medium">
-                #Electronic
-              </span>
-              <span className="bg-blue-600/20 text-blue-300 px-4 py-1 rounded-full text-sm font-medium">
-                #Indie
-              </span>
+              {userData.data.likedGenres.map((item: string, i: number) => (
+                <span
+                  key={i}
+                  className={`${
+                    genreGradientPalette[i % genreGradientPalette.length]
+                  } border px-4 py-1 rounded-full text-sm font-medium transition-all duration-200 hover:scale-105 shadow-sm`}
+                >
+                  #{item}
+                </span>
+              ))}
             </div>
           </div>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="text-velvet hover:text-[#5c248a] underline cursor-pointer transition duration-200 italic absolute right-3 bottom-3"
+          >
+            edit profile
+          </button>
         </section>
 
         {/* Following Section with Carousel */}
@@ -479,3 +381,65 @@ const ProfilePage = () => {
 };
 
 export default ProfilePage;
+
+const ProfilePageLoader = () => {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-zinc-900 to-neutral-950 text-white">
+      <div className="w-full max-w-md px-8 py-12 rounded-2xl bg-dark-elevated/80 backdrop-blur-xl border border-gray-800 shadow-[0_0_30px_-10px_rgba(111,45,168,0.7)] flex flex-col items-center text-center space-y-6">
+        {/* Header with Icon */}
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-r from-[#6f2da8] to-purple-600 shadow-lg shadow-purple-500/25">
+            <User size={22} className="text-white" />
+          </div>
+          <h1 className="text-2xl font-semibold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+            Loading Your Profile
+          </h1>
+        </div>
+
+        {/* Description */}
+        <p className="text-gray-400 text-sm leading-relaxed">
+          Fetching your musical identity and preferences from the beat universe.
+        </p>
+
+        {/* Enhanced Loader with Music Theme */}
+        <div className="relative">
+          {/* Main spinning ring */}
+          <div className="animate-spin rounded-full h-16 w-16 border-2 border-transparent bg-gradient-to-r from-[#6f2da8] via-purple-500 to-pink-500 p-1">
+            <div className="rounded-full h-full w-full bg-gradient-to-br from-black via-zinc-900 to-neutral-950" />
+          </div>
+
+          {/* Floating music icons */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="relative">
+              <Music size={20} className="text-[#6f2da8] animate-pulse" />
+              {/* Orbiting mini icons */}
+              <div className="absolute -top-8 -left-2 animate-bounce delay-300">
+                <Heart size={12} className="text-pink-400" />
+              </div>
+              <div className="absolute -bottom-8 -right-2 animate-bounce delay-700">
+                <Headphones size={12} className="text-purple-400" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Loading dots */}
+        <div className="flex space-x-2">
+          <div className="w-2 h-2 bg-[#6f2da8] rounded-full animate-bounce" />
+          <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce delay-150" />
+          <div className="w-2 h-2 bg-pink-500 rounded-full animate-bounce delay-300" />
+        </div>
+
+        {/* Status text */}
+        <p className="text-xs text-gray-500 pt-2">
+          Syncing your beats and vibes...
+        </p>
+
+        {/* Subtle progress bar */}
+        <div className="w-full bg-gray-800 rounded-full h-1 overflow-hidden">
+          <div className="h-full bg-gradient-to-r from-[#6f2da8] to-purple-500 rounded-full animate-pulse" />
+        </div>
+      </div>
+    </div>
+  );
+};
