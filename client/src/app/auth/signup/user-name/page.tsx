@@ -38,7 +38,9 @@ const CreateUsername = () => {
 
     const result = await updateUserInfo(updatedData);
 
-    if (result.data.success) {
+    console.log(result);
+
+    if (result?.data?.success) {
       router.push("/");
     }
   };

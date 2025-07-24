@@ -14,11 +14,13 @@ async function bootstrap() {
 
   app.enableCors({
     origin: (origin, callback) => {
-      const allowedOrigins = ['https://beatnest-eight.vercel.app'];
+      // const allowedOrigins = ['https://beatnest-eight.vercel.app'];
+      const allowedOrigins = ['http://localhost:3000'];
+
       if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        callback(new Error('Not allowed by CORS'));
+        callback(new Error('Not allowed by CORS Policy at all'));
       }
     },
     credentials: true,
