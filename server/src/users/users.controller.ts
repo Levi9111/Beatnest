@@ -67,8 +67,6 @@ export class UsersController {
     @CurrentUser() user: CurrentUserPayload,
     @Body() dto: UpdateUserDto,
   ) {
-    console.log(user);
-    console.log(dto);
     const result = await this.usersService.updateUser(user.userId, dto);
 
     return {

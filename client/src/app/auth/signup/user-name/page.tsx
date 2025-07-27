@@ -28,17 +28,16 @@ const CreateUsername = () => {
     if (!isLoading && userData?.userName) {
       router.push("/");
     }
-  }, [isLoading, , userData, router]);
+  }, [isLoading, userData, router]);
 
   const onSubmit = async (formData: UsernameFormData) => {
+    console.log("Submitting UserName");
+
     const updatedData = {
-      id: userData.userId,
       userName: formData.username,
     };
 
     const result = await updateUserInfo(updatedData);
-
-    console.log(result);
 
     if (result?.data?.success) {
       router.push("/");
@@ -107,6 +106,7 @@ const CreateUsername = () => {
               type="submit"
               className="w-full bg-velvet hover:bg-velvet/90 transition rounded-lg text-white font-medium py-2"
               disabled={isSubmitting || isUpdating}
+              // onClick={onSubmit}
             >
               {isSubmitting || isUpdating ? "Saving..." : "Save Username"}
             </Button>
