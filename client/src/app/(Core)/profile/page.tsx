@@ -172,6 +172,8 @@ const ProfilePage = () => {
     formData.append("audio", data.audio[0]);
     formData.append("image", data.cover[0]);
 
+    console.log(data);
+
     try {
       const result = await uploadSong(formData).unwrap();
       reset();

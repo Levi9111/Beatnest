@@ -12,17 +12,26 @@ import * as passport from 'passport';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  app.enableCors({
-    origin: (origin, callback) => {
-      // const allowedOrigins = ['https://beatnest-eight.vercel.app'];
-      const allowedOrigins = ['http://localhost:3000'];
+  // TODO: Very Important: Enable CORS later
 
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS Policy at all'));
-      }
-    },
+  // app.enableCors({
+  //   origin: (origin, callback) => {
+  //     const allowedOrigins = [
+  //       'http://localhost:3000',
+  //       'https://beatnest-eight.vercel.app',
+  //     ];
+
+  //     if (allowedOrigins.includes(origin)) {
+  //       callback(null, true);
+  //     } else {
+  //       callback(new Error('Not allowed by CORS Policy at all'));
+  //     }
+  //   },
+  //   credentials: true,
+  // });
+
+  app.enableCors({
+    origin: true,
     credentials: true,
   });
 
