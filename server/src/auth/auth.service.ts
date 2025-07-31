@@ -19,6 +19,7 @@ import { Model } from 'mongoose';
 import { GenerateOtpDto } from './dto/generate-otp.dto';
 import { VerifyOtpDto } from './dto/verrify-otp.dto';
 import { generateDefauleUserName } from 'src/utils/generateDefaultUserName';
+
 @Injectable()
 export class AuthService {
   constructor(
